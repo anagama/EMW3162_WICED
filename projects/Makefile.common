@@ -24,8 +24,9 @@ LIBRARYLIST=./bsp/link.opts
 LDFLAGS=-L$(BSP)/ld/  -T$(BSP)/ld/app_with_bootloader.ld
 CCLINKFLAGS=-Wl,--gc-sections -Wl,-O3 -mthumb -mcpu=cortex-m3 -Wl,-A,thumb -mlittle-endian -nostartfiles -Wl,--defsym,__STACKSIZE__=800 $(LDFLAGS) -Wl,--start-group  bsp/lib/*.o bsp/lib/*.a
 
-SRCS=$(shell find $(SOURCEDIR) -name '*.c')
+SRCS=$(shell find $(SOURCEDIR) -name '*.c' -o -name '*.cpp')
 SRCS := $(SRCS:%.c=%.o)
+SRCS := $(SRCS:%.cpp=%.o)
 OBJECTS := $(addprefix $(BUILDDIR)/,$(SRCS))
 
 DCT_OBJECT=$(BUILDDIR)/dct/dct.o
@@ -81,7 +82,10 @@ $(BINARY): $(RESOURCE_H) $(OBJECTS)
 	cp $(BSP)/bin/waf_bootloader-NoOS-NoNS-EMW3162-SDIO.elf ./bin/bootloader.elf
 	cp $(BSP)/bin/waf_bootloader-NoOS-NoNS-EMW3162-SDIO.bin ./bin/bootloader.bin
 
-
+$(BUILDDIR)/%.o: %.cpp
+	@mkdir -p $(@D)
+	$(CP) $(CCFLAGS) -std=c11  -o $@ $<
+	
 $(BUILDDIR)/%.o: %.c
 	@mkdir -p $(@D)
 	$(CC) $(CCFLAGS)  -o $@ $<
